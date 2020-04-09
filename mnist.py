@@ -1,71 +1,88 @@
-from __future__ import print_function
-import sys, os, argparse
 import torch
 import torchvision
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.autograd import Variable
+import torchvision.transforms as transforms
+from IPython import display
 import matplotlib.pyplot as plt
-
-print(sys.path[0])
-data_dir = 'resources/dataset'
-
-cuda = torch.cuda.is_available()
+import numpy as np
 
 
-parse = argparse.ArgumentParser(description='Pytorch MNIST Example')
-parse.add_argument('--batchSize', type=int, default=64, metavar='input batch size')
-parse.add_argument('--testBatchSize', type=int, default=100, metavar='input batch size for testing')
-parse.add_argument('--trainSize', type=int, default=10000, metavar='input dataset size(max=60000).Default=1000')
-parse.add_argument('--nEpochs', type=int, default=2, metavar='number of epochs to train')
-parse.add_argument('--lr', type=float, default=0.01, metavar='Learning rate.Deafault=0.01')
-parse.add_argument('--momentum', type=float, default=0.5, metavar='Default=0.5', )
-parse.add_argument('--seed', type=int, default=123, metavar='Romdom Seed to use.Default=123')
+# @Class  : MNIST数据集识别相关函数
+# @Author  : xwh
+# @Time    : 2020/4/8 20:41
+def load_dataset(data_dir='resources/dataset', batch_size=100):
+    """
+    获取数据管道
+    :param data_dir:
+    :param batch_size:
+    :returns: train_loader, test_loader 训练集，测试集的数据管道
+    """
+    # 载入手写体数据 如果不存在则下载
+    train_dataset = torchvision.datasets.MNIST(root=data_dir,
+                                               train=True,
+                                               transform=transforms.ToTensor(),
+                                               download=True)
 
-opt = parse.parse_args()
+    test_dataset = torchvision.datasets.MNIST(root=data_dir,
+                                              train=False,
+                                              transform=transforms.ToTensor())
 
-torch.manual_seed(opt.seed)
-if cuda:
-    torch.cuda.manual_seed(opt.seed)
+    # 构建数据管道
+    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
+                                               batch_size=batch_size,
+                                               shuffle=True)
 
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(
-        root=data_dir,
-        train=True,
-        transform=torchvision.transforms.ToTensor(),
-        download=True),
-    batch_size=opt.batchSize,
-    shuffle=True
-)
+    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
+                                              batch_size=batch_size,
+                                              shuffle=False)
+    return train_loader, test_loader
 
-test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(
-        root=data_dir,
-        train=False,
-        transform=torchvision.transforms.ToTensor(),
-        download=True),
-    batch_size=opt.batchSize,
-    shuffle=True
-)
 
-# print('===>Loading data')
-# # with open(data_dir + "/MNIST/processed/training.pt", 'rb') as f:
-# #     training_set = torch.load(f)
-# #
-# # with open(data_dir + "/MNIST/processed/test.pt", 'rb') as f:
-# #     test_set = torch.load(f)
-# # print('<===Done')
-# #
-# # # reshape image to 60000*1*28*28
-# # training_data = training_set[0].view(-1, 1, 28, 28)
-# # training_data = training_data[:opt.trainSize]
-# # training_labels = training_set[1]
-# # test_data = test_set[0].view(-1, 1, 28, 28)
-# # test_labels = test_set[1]
-# #
-# # print(training_labels.shape)
-# for y in training_labels:
-#     print()
-print(train_loader.dataset.data)
-print(train_loader.dataset.targets)
+def labels_to_one_hot(data_loader):
+    """
+    将传入的数据管道的标签转换为one-hot编码
+    :param data_loader: 数据管道, 可以是测试集或者数据集
+    :return: one_hot_label one-hot编码的tensor list
+    """
+    labels = data_loader.dataset.targets.numpy()
+    one_hot_label = []
+    for label in labels:
+        y = torch.zeros(10, dtype=torch.int)
+        y[label] = 1
+        one_hot_label.append(y)
+    return one_hot_label
+
+
+def show_mnist_image(data_loader=None, size=10):
+    """
+    随机展示传入的MNIST数据集的图片
+    :param data_loader: 数据管道, 训练集或测试集
+    :param size: 默认显示张数
+    :return:
+    """
+    # 图片数据, 标签数据
+    images, labels = data_loader.dataset.data, data_loader.dataset.targets
+    # tart为第一张待展示图片的下标
+    start = np.random.randint(0, 60000 - size * 2)
+
+    # 随机在60000张图片内选择size张
+    # img: 待展示图片  img_label: img对应的标签
+    img, img_label = [], []
+    for i in range(start, start + size):
+        img.append(images[i])
+        img_label.append(labels[i].item())
+
+    # 设置为svg格式显示, 可缩放矢量图形(Scalable Vector Graphics)
+    display.set_matplotlib_formats('svg')
+
+    # _: 忽略的变量
+    _, figs = plt.subplots(1, len(img), figsize=(10, 3))
+
+    # 将每一张图片和对应的标签在子图中展示
+    for f, img, lbl in zip(figs, img, img_label):
+        # 将784转为28*28展示
+        f.imshow(img.view((28, 28)).numpy())
+        # 在图片上方设置对应的label
+        f.set_title(lbl)
+        f.axes.get_xaxis().set_visible(False)
+        f.axes.get_yaxis().set_visible(False)
+    plt.show()
