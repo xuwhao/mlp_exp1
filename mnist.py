@@ -37,18 +37,15 @@ def load_dataset(data_dir='resources/dataset', batch_size=100):
     return train_loader, test_loader
 
 
-def labels_to_one_hot(data_loader):
+def labels_to_one_hot(labels):
     """
-    将传入的数据管道的标签转换为one-hot编码
-    :param data_loader: 数据管道, 可以是测试集或者数据集
+    将传入的标签转换为one-hot编码
+    :param labels: 标签tensor list
     :return: one_hot_label one-hot编码的tensor list
     """
-    labels = data_loader.dataset.targets.numpy()
-    one_hot_label = []
-    for label in labels:
-        y = torch.zeros(10, dtype=torch.int)
-        y[label] = 1
-        one_hot_label.append(y)
+    one_hot_label = torch.zeros([len(labels), 10], dtype=torch.float)
+    for i in range(len(labels)):
+        one_hot_label[i][labels[i]] = 1
     return one_hot_label
 
 
