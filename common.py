@@ -13,4 +13,4 @@ for i in range(10):
 print("\n>>> 检验完毕！")
 
 # 随机显示size张data_loader中的图片
-# mnist.show_mnist_image(data_loader=train_loader, size=10)
+mnist.show_mnist_image(data_loader=train_loader, size=10)

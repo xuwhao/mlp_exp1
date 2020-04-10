@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# @Class  : MNIST数据集识别相关函数
+# @Class   : MNIST数据集识别相关函数
 # @Author  : xwh
 # @Time    : 2020/4/8 20:41
 def load_dataset(data_dir='resources/dataset', batch_size=100):
@@ -41,7 +41,7 @@ def labels_to_one_hot(labels):
     """
     将传入的标签转换为one-hot编码
     :param labels: 标签tensor list
-    :return: one_hot_label one-hot编码的tensor list
+    :return: one-hot编码的tensor list
     """
     one_hot_label = torch.zeros([len(labels), 10], dtype=torch.float)
     for i in range(len(labels)):
@@ -76,7 +76,7 @@ def show_mnist_image(data_loader=None, size=10):
 
     # 将每一张图片和对应的标签在子图中展示
     for f, img, lbl in zip(figs, img, img_label):
-        # 将784转为28*28展示
+        # 将784的vector转为28*28展示
         f.imshow(img.view((28, 28)).numpy())
         # 在图片上方设置对应的label
         f.set_title(lbl)
