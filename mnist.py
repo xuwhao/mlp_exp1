@@ -4,6 +4,7 @@ import torchvision.transforms as transforms
 from IPython import display
 import matplotlib.pyplot as plt
 import numpy as np
+import torch.nn as nn
 
 
 # @Class   : MNIST数据集识别相关函数
@@ -43,7 +44,9 @@ def labels_to_one_hot(labels):
     :param labels: 标签tensor list
     :return: one-hot编码的tensor list
     """
+    # n个标签*10列的tensor list
     one_hot_label = torch.zeros([len(labels), 10], dtype=torch.float)
+    # 对于每个label 对应位置置为1
     for i in range(len(labels)):
         one_hot_label[i][labels[i]] = 1
     return one_hot_label
@@ -83,3 +86,131 @@ def show_mnist_image(data_loader=None, size=10):
         f.axes.get_xaxis().set_visible(False)
         f.axes.get_yaxis().set_visible(False)
     plt.show()
+
+
+def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight_decay=0):
+    """
+    训练神经网络
+    :param train_loader: 训练集数据管道
+    :param model: 待训练的网络模型
+    :param num_epochs: 每个batch的训练次数
+    :param learning_rate: 学习率
+    :param criterion_name: 损失函数名, "mse": MSE, "cross": 交叉熵
+    :param weight_decay: 权重衰减值, 默认不衰减
+    :return: exp_data 实验数据dict 需要的数据自行记录, 不要更改他人记录的key, 只返回一个dict, key在下方列出
+    :key:  learning_rate 学习率, num_epochs 迭代周期, batch_size batch大小,
+            loss_x 当前迭代次数, loss_y 对应的loss值, accuracy_train 训练集精度,
+            accuracy_test, 测试集精度
+    """
+    # 待记录的数据初始化
+    exp_data = {"learning_rate": learning_rate, "num_epochs": num_epochs, "batch_size": train_loader.batch_size}
+    loss_x, loss_y = [], []
+    correct = 0
+    total = 0
+
+    # 判断设备是cpu还是gpu
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Adam优化器, weight_decay 权重衰减
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+    # 根据传入的criterion_name设置损失函数
+    criterion = nn.MSELoss()
+    if criterion_name == "cross":
+        criterion = nn.CrossEntropyLoss()
+
+    total_step = len(train_loader)
+    # 开始训练
+    for epoch in range(num_epochs):
+        for i, (images, labels) in enumerate(train_loader):
+
+            # 如果是MSE, label转换为one-hot编码
+            # 为计算精确度方便，并未直接替换原标签tensor
+            one_hot = labels
+            if criterion_name == "mse":
+                one_hot = labels_to_one_hot(labels=labels)
+
+            # gpu加速
+            images = images.reshape(-1, 28 * 28).to(device)
+            labels = labels.to(device)
+            one_hot = one_hot.to(device)
+
+            # 前向传播和计算loss
+            outputs = model(images)
+            loss = criterion(outputs, one_hot)
+
+            # 后向传播和调整参数
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            # 数据记录
+            loss_x.append(int((epoch + 1) * i))  # 迭代次数
+            loss_y.append(loss.item())  # 对应loss
+
+            # 精度
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+            if (i + 1) % 100 == 0:  # 每一百次打印一下
+                print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+                      .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
+
+    # 保存数据到dict
+    accuracy = 100 * correct / total
+    print('Test Accuracy of the network: {} %'.format(accuracy))
+    exp_data["loss_x"] = loss_x
+    exp_data["loss_y"] = loss_y
+    exp_data["accuracy_train"] = accuracy
+    return exp_data
+
+
+def test_accuracy(test_loader, model):
+    """
+    在测试集上计算精度
+    :param test_loader: 测试集数据管道
+    :param model: 训练好的模型
+    :return: accuracy 精度
+    """
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    accuracy = 0
+
+    with torch.no_grad():
+        correct = 0
+        total = 0
+        for images, labels in test_loader:
+            images = images.reshape(-1, 28 * 28).to(device)
+            labels = labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            # print(_, predicted)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+        accuracy = 100 * correct / total
+        print('Test Accuracy of the network: {} %'.format(accuracy))
+
+    return accuracy
+
+
+def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, criterion_name, weight_decay=0):
+    """
+    训练并计算精度
+    :param train_loader: 训练集数据管道
+    :param test_loader: 测试集数据管道
+    :param model: 待训练的网络模型
+    :param num_epochs: 每个batch的训练次数
+    :param learning_rate: 学习率
+    :param criterion_name: 损失函数名, "mse": MSE, "cross": 交叉熵
+    :param weight_decay: 权重衰减值, 默认不衰减
+    :return: exp_data
+            learning_rate 学习率, num_epochs 迭代周期, batch_size batch大小,
+            loss_x 当前迭代次数, loss_y 对应的loss值, accuracy_train 训练集精度,
+            accuracy_test, 测试集精度
+    """
+    exp_data = train(train_loader=train_loader, model=model, num_epochs=num_epochs, learning_rate=learning_rate,
+                     criterion_name=criterion_name, weight_decay=weight_decay)
+    accuracy_test = test_accuracy(test_loader, model)
+    exp_data['accuracy_test'] = accuracy_test
+    return exp_data
