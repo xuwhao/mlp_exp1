@@ -16,8 +16,8 @@ train_loader, test_loader = mnist.load_dataset()
 # mnist.show_mnist_image(data_loader=train_loader, size=10)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Net2Layers(hidden_size=300, activation='relu').to(device)
-exp_data = mnist.train_and_test(train_loader, test_loader, model, num_epochs=1,
+model = Net2Layers(hidden_size=500, activation='relu', out_activate=False).to(device)
+exp_data = mnist.train_and_test(train_loader, test_loader, model, num_epochs=5,
                                 learning_rate=1e-3, criterion_name="mse", weight_decay=0)
 data = [{'x': exp_data["loss_x"], 'y': exp_data["loss_y"]}]
 painter.line_chart(data, "iter", "loss", "loss分析", img_size=(12, 8), x_gap=100)
