@@ -152,7 +152,7 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            if (i + 1) % 100 == 0:  # 每一百次打印一下
+            if (i + 1) % 10 == 0:  # 每一百次打印一下
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
 

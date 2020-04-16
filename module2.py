@@ -7,13 +7,13 @@ import os
 # @Time    : 2020/4/16 19:10
 
 # 载入训练集和测试集的数据管道
-train_loader, test_loader = mnist.load_dataset(batch_size=600)
+train_loader, test_loader = mnist.load_dataset(batch_size=5000)
 
 # 训练位置
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 学习率、迭代周期的所有待训练可能
-learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [500, 1000, 2000], ["sigmoid", "relu"]
+learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [100, 200, 300], ["sigmoid", "relu"]
 
 
 exp_data_dir = 'resources/ans/exp_data/module2/'
