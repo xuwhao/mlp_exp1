@@ -1,7 +1,5 @@
-import torch
-import torch.nn as nn
 from MyModule import *
-import painter
+import time
 import mnist
 import os
 
@@ -15,9 +13,8 @@ train_loader, test_loader = mnist.load_dataset(batch_size=600)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 学习率、迭代周期的所有待训练可能
-# learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5, 1e-6], [500, 1000, 2000], ["sigmoid", "relu"]
+learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [500, 1000, 2000], ["sigmoid", "relu"]
 
-learning_rate, num_epochs, activation = [1e-3], [1], ["sigmoid"]
 
 exp_data_dir = 'resources/ans/exp_data/module2/'
 
@@ -39,10 +36,15 @@ for lr in learning_rate:  # 每一个学习率
                 # 模型创建
                 model = Net2Layers(hidden_size=1000, activation=activate, out_activate=out_activation).to(device)
 
+                start = time.time()
+
                 # 训练
                 exp_data = mnist.train_and_test(train_loader=train_loader, test_loader=test_loader, model=model,
                                                 num_epochs=epoch, learning_rate=lr, criterion_name="mse",
                                                 weight_decay=0)
+
+                duration = time.time() - start
+                exp_data["duration"] = duration
 
                 # 保存数据
                 mnist.save_exp_data(exp_data, file_name, exp_data_dir)
