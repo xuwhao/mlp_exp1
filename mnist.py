@@ -13,8 +13,8 @@ import torch.nn as nn
 def load_dataset(data_dir='resources/dataset', batch_size=100):
     """
     获取数据管道
-    :param data_dir:
-    :param batch_size:
+    :param data_dir: 数据集的文件地址
+    :param batch_size: 批量大小
     :returns: train_loader, test_loader 训练集，测试集的数据管道
     """
     # 载入手写体数据 如果不存在则下载
@@ -99,8 +99,7 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
     :param weight_decay: 权重衰减值, 默认不衰减
     :return: exp_data 实验数据dict 需要的数据自行记录, 不要更改他人记录的key, 只返回一个dict, key在下方列出
     :key:  learning_rate 学习率, num_epochs 迭代周期, batch_size batch大小,
-            loss_x 当前迭代次数, loss_y 对应的loss值, accuracy_train 训练集精度,
-            accuracy_test, 测试集精度
+            loss_x 当前迭代次数, loss_y 对应的loss值, accuracy_train 训练集精度
     """
     # 待记录的数据初始化
     exp_data = {"learning_rate": learning_rate, "num_epochs": num_epochs, "batch_size": train_loader.batch_size}
@@ -159,7 +158,7 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
 
     # 保存数据到dict
     accuracy = 100 * correct / total
-    print('Test Accuracy of the network: {} %'.format(accuracy))
+    print('Train Accuracy of the network: {} %'.format(accuracy))
     exp_data["loss_x"] = loss_x
     exp_data["loss_y"] = loss_y
     exp_data["accuracy_train"] = accuracy
@@ -214,3 +213,12 @@ def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, 
     accuracy_test = test_accuracy(test_loader, model)
     exp_data['accuracy_test'] = accuracy_test
     return exp_data
+
+
+def save_exp_data(exp_data, file_name, data_dir='resources/ans/exp_data/'):
+    fp = open(data_dir + file_name + ".txt", 'w', encoding='utf-8')
+    result = []
+    for key in exp_data.keys():
+        result.append(key + ":" + str(exp_data[key]))
+    fp.writelines([line + '\n' for line in result])
+    fp.close()

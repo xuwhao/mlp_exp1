@@ -8,6 +8,7 @@ import torch
 class Net2Layers(nn.Module):
     """
     结构：2-layer Neutral Net, 28*28-hidden_size-10
+    :param hidden_size 隐藏层神经元个数
     :param activation 激活函数类型 "sigmoid" or "relu"
     :param out_activate 输出层是否使用激活函数
     """
@@ -53,7 +54,7 @@ class Net3Layers(nn.Module):
         activation_func = nn.Sigmoid()
         if activation == "relu":
             activation_func = nn.ReLU(True)
-        super(Net2Layers, self).__init__()
+        super(Net3Layers, self).__init__()
         self.layer1 = nn.Sequential(nn.Linear(input_size, hidden_size[0]), activation_func)
         self.layer2 = nn.Sequential(nn.Linear(hidden_size[0], hidden_size[1]), activation_func)
         if out_activate:
@@ -74,3 +75,4 @@ class Net3Layers(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         return x
+
