@@ -13,7 +13,7 @@ train_loader, test_loader = mnist.load_dataset(batch_size=5000)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 学习率、迭代周期的所有待训练可能
-learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [1, 200], ["sigmoid", "relu"]
+learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [100, 200], ["sigmoid", "relu"]
 exp_data_dir = 'resources/ans/exp_data/module4/'
 hidden_size = [500, 150]
 weight_decay = 0
