@@ -5,7 +5,7 @@ from IPython import display
 import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
-
+import os
 
 # @Class   : MNIST数据集识别相关函数
 # @Author  : xwh
@@ -215,7 +215,9 @@ def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, 
     return exp_data
 
 
-def save_exp_data(exp_data, file_name, data_dir='resources/ans/exp_data/'):
+def save_exp_data(exp_data, file_name, data_dir):
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
     fp = open(data_dir + file_name + ".txt", 'w', encoding='utf-8')
     result = []
     for key in exp_data.keys():

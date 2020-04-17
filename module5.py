@@ -13,9 +13,10 @@ train_loader, test_loader = mnist.load_dataset(batch_size=5000)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 学习率、迭代周期的所有待训练可能
-learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [100, 200, 300], ["sigmoid", "relu"]
-
-exp_data_dir = 'resources/ans/exp_data/module2/'
+learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [100, 200], ["sigmoid", "relu"]
+exp_data_dir = 'resources/ans/exp_data/module5/'
+hidden_size = [500, 300]
+weight_decay = 1e-8
 
 for lr in learning_rate:  # 每一个学习率
     for epoch in num_epochs:  # 每一个迭代周期
@@ -33,14 +34,13 @@ for lr in learning_rate:  # 每一个学习率
                     print("参数组合 [" + file_name + "] 开始训练...")
 
                 # 模型创建
-                model = Net2Layers(hidden_size=1000, activation=activate, out_activate=out_activation).to(device)
-
+                model = Net3Layers(hidden_size=hidden_size, activation=activate, out_activate=out_activation).to(device)
                 start = time.time()
 
                 # 训练
                 exp_data = mnist.train_and_test(train_loader=train_loader, test_loader=test_loader, model=model,
-                                                num_epochs=epoch, learning_rate=lr, criterion_name="mse",
-                                                weight_decay=0)
+                                                num_epochs=epoch, learning_rate=lr, criterion_name="cross",
+                                                weight_decay=weight_decay)
 
                 duration = time.time() - start
                 exp_data["duration"] = duration

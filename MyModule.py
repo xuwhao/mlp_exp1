@@ -58,9 +58,9 @@ class Net3Layers(nn.Module):
         self.layer1 = nn.Sequential(nn.Linear(input_size, hidden_size[0]), activation_func)
         self.layer2 = nn.Sequential(nn.Linear(hidden_size[0], hidden_size[1]), activation_func)
         if out_activate:
-            self.layer3 = nn.Sequential(nn.Linear(hidden_size, output_size), activation_func)
+            self.layer3 = nn.Sequential(nn.Linear(hidden_size[1], output_size), activation_func)
         else:
-            self.layer3 = nn.Sequential(nn.Linear(hidden_size, output_size))
+            self.layer3 = nn.Sequential(nn.Linear(hidden_size[1], output_size))
         for name, param in self.named_parameters():
             if 'weight' in name:
                 if activation == "relu":
