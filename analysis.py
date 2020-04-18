@@ -1,8 +1,8 @@
-# @Author  : xwh
-# @Time    : 2020/4/17 20:49
 import os
 
 
+# @Author  : xwh
+# @Time    : 2020/4/17 20:49
 def get_all_exp_data(exp_data_dir):
     """
     获取传入的路径下的所有试验数据
@@ -47,5 +47,6 @@ def get_best_accuracy_module(exp_data_dir=None, exp_data_dict=None):
             best_exp_data = exp_data
     print(accuracy)
     return best_exp_data
+
 
 print(get_best_accuracy_module("resources/ans/exp_data/module2/"))
