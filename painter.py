@@ -41,7 +41,7 @@ def line_chart(data=[], x_label=[], y_label=[], f_name='', save=True, img_size=(
             is_multi = 1
         plt.plot(dic['x'], dic['y'], color, label=label, marker=marker, linestyle=line_style)
     if is_multi == 1:
-        font = {'weight': 'normal', 'size': 10}
+        font = {'weight': 'normal', 'size': 15}
         plt.legend(loc=2, prop=font)
     if save:
         plt.savefig(img_path + f_name + '.png')

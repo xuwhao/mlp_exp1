@@ -59,7 +59,7 @@ lr = 0.0001
 epoch = 200
 activate = "relu"
 out_activation = True
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')# 保存的文件名 学习率_迭代周期_激活函数_输出层是否使用.txt
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 保存的文件名 学习率_迭代周期_激活函数_输出层是否使用.txt
 file_name = str(lr) + '_' + str(epoch) + '_' + activate + '_' + str(out_activation)
 
 print(device)

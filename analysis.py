@@ -1,6 +1,7 @@
 import os
 import numpy as np
 
+
 # @Author  : xwh
 # @Time    : 2020/4/17 20:49
 def get_all_exp_data(exp_data_dir):
@@ -16,7 +17,7 @@ def get_all_exp_data(exp_data_dir):
         f = open(exp_data_dir + url, 'r')
         for line in f:
             key, value = line.strip().split(':')
-            if key == "loss_x" or key == "loss_y":
+            if key == "loss_x" or key == "loss_y" or "loss_y_test":
                 value = value.strip('[')
                 value = value.strip(']')
                 value = list(map(float, value.split(',')))
@@ -57,7 +58,7 @@ def partial_arr(arr, arr_y):
     for i in range(len(arr)):
         if arr[i] - 0 < 1e-6:
             count += 1
-        if count == 20:
+        if count == 200:
             pos = i
             break
     return arr[5:pos], arr_y[5:pos]
