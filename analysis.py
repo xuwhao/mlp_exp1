@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 
 # @Author  : xwh
 # @Time    : 2020/4/17 20:49
@@ -49,4 +49,13 @@ def get_best_accuracy_module(exp_data_dir=None, exp_data_dict=None):
     return best_exp_data
 
 
-print(get_best_accuracy_module("resources/ans/exp_data/module2/"))
+def partial_arr(arr, arr_y):
+    arr = np.array(arr)
+    count, pos = 0, 0
+    for i in range(len(arr)):
+        if arr[i] - 0 < 1e-6:
+            count += 1
+        if count == 20:
+            pos = i
+            break
+    return arr[5:pos], arr_y[5:pos]

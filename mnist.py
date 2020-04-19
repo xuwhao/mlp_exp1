@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 import os
 
+
 # @Class   : MNIST数据集识别相关函数
 # @Author  : xwh
 # @Time    : 2020/4/8 20:41
@@ -75,7 +76,7 @@ def show_mnist_image(data_loader=None, size=10):
     display.set_matplotlib_formats('svg')
 
     # _: 忽略的变量
-    _, figs = plt.subplots(1, len(img), figsize=(10, 3))
+    _, figs = plt.subplots(1, len(img), figsize=(5, 2))
 
     # 将每一张图片和对应的标签在子图中展示
     for f, img, lbl in zip(figs, img, img_label):
@@ -97,12 +98,15 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
     :param learning_rate: 学习率
     :param criterion_name: 损失函数名, "mse": MSE, "cross": 交叉熵
     :param weight_decay: 权重衰减值, 默认不衰减
-    :return: exp_data 实验数据dict 需要的数据自行记录, 不要更改他人记录的key, 只返回一个dict, key在下方列出
+    :return: exp_data 实验数据dict 需要的数据自行记录, 不要更改他人记录的key,
+                    只返回一个dict, key在下方列出
     :key:  learning_rate 学习率, num_epochs 迭代周期, batch_size batch大小,
-            loss_x 当前迭代次数, loss_y 对应的loss值, accuracy_train 训练集精度
+            loss_x 当前迭代次数, loss_y 对应的loss值, loss_y_test 测试集loss值
+            accuracy_train 训练集精度, accuracy_test 测试集精度
     """
     # 待记录的数据初始化
-    exp_data = {"learning_rate": learning_rate, "num_epochs": num_epochs, "batch_size": train_loader.batch_size}
+    exp_data = {"learning_rate": learning_rate, "num_epochs": num_epochs,
+                "batch_size": train_loader.batch_size}
     loss_x, loss_y = [], []
     correct = 0
     total = 0
@@ -111,7 +115,8 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Adam优化器, weight_decay 权重衰减
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(),
+                                 lr=learning_rate, weight_decay=weight_decay)
 
     # 根据传入的criterion_name设置损失函数
     criterion = nn.MSELoss()
@@ -152,7 +157,7 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            if (i + 1) % 10 == 0:  # 每一百次打印一下
+            if (i + 1) % 10 == 0:  # 每十次打印一下
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
 
@@ -203,10 +208,10 @@ def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, 
     :param learning_rate: 学习率
     :param criterion_name: 损失函数名, "mse": MSE, "cross": 交叉熵
     :param weight_decay: 权重衰减值, 默认不衰减
-    :return: exp_data
-            learning_rate 学习率, num_epochs 迭代周期, batch_size batch大小,
-            loss_x 当前迭代次数, loss_y 对应的loss值, accuracy_train 训练集精度,
-            accuracy_test, 测试集精度
+    :return: exp_data 实验数据dict 需要的数据自行记录, 不要更改他人记录的key, 只返回一个dict, key在下方列出
+    :key:  learning_rate 学习率, num_epochs 迭代周期, batch_size batch大小,
+            loss_x 当前迭代次数, loss_y 对应的loss值, loss_x_test 测试集迭代次数, loss_y_test 测试集loss值
+            accuracy_train 训练集精度, accuracy_test 测试集精度
     """
     exp_data = train(train_loader=train_loader, model=model, num_epochs=num_epochs, learning_rate=learning_rate,
                      criterion_name=criterion_name, weight_decay=weight_decay)
@@ -216,6 +221,12 @@ def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, 
 
 
 def save_exp_data(exp_data, file_name, data_dir):
+    """
+    保存实验数据
+    :param exp_data 实验数据dict
+    :param file_name 文件名
+    :param data_dir 保存路径
+    """
     if not os.path.exists(data_dir):
         os.mkdir(data_dir)
     fp = open(data_dir + file_name + ".txt", 'w', encoding='utf-8')

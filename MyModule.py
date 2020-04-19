@@ -12,7 +12,6 @@ class Net2Layers(nn.Module):
     :param activation 激活函数类型 "sigmoid" or "relu"
     :param out_activate 输出层是否使用激活函数
     """
-
     def __init__(self, hidden_size, activation="sigmoid", out_activate=False):
         # 输入层, 隐藏层, 输出层
         input_size, output_size = 28 * 28, 10
@@ -39,8 +38,6 @@ class Net2Layers(nn.Module):
         x = self.layer2(x)
         return x
 
-
-class Net3Layers(nn.Module):
     """
     结构：3-layer Neutral Net, 784-hidden_size[0]-hidden_size[1]-10
     :param hidden_size 数组
@@ -48,8 +45,9 @@ class Net3Layers(nn.Module):
     :param out_activate 输出层是否使用激活函数
     """
 
+
+class Net3Layers(nn.Module):
     def __init__(self, hidden_size, activation="sigmoid", out_activate=False):
-        # 输入层, 输出层
         input_size, output_size = 28 * 28, 10
         activation_func = nn.Sigmoid()
         if activation == "relu":
