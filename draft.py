@@ -3,7 +3,7 @@
 import analysis
 import painter
 
-dir = "resources/ans/exp_data/module2/"
+dir = "resources/ans/exp_data/module3/"
 # all_time = 0.0
 # exp_data_dict = analysis.get_all_exp_data(exp_data_dir=dir)
 #
@@ -19,29 +19,39 @@ dir = "resources/ans/exp_data/module2/"
 # print(name, exp_data)
 
 # exp_data_dict = analysis.get_all_exp_data(dir)
-# key = "0.0001_200_relu_True"
+# key = "0.001_100_relu_False"
 # exp_data = exp_data_dict[key]
 # x, y = analysis.partial_arr(exp_data["loss_x"], exp_data["loss_y"])
 # x1, y1 = analysis.partial_arr(exp_data["loss_x"], exp_data["loss_y_test"])
 # length = len(y)
 # x = []
 # for i in range(length):
-#     x.append(i+5)
+#     x.append(i + 5)
 # length1 = len(y1)
 # x1 = []
 # for i in range(length1):
-#     x1.append(i+5)
-#
+#     x1.append(i + 5)
+# print(exp_data["loss_y_test"])
 # data = [{'x': x, 'y': y, "label": "训练集loss"}, {'x': x1, 'y': y1, "label": "测试集loss"}]
-# painter.line_chart(data, "iter", "loss", "模型2-训练集与测试集损失函数趋势图", img_size=(12, 8), x_gap=200)
+# painter.line_chart(data, "iter", "loss", "模型3-训练集与测试集损失函数趋势图", img_size=(12, 8), x_gap=200)
 
 # 过拟合的参数
-# exp_data_dict = analysis.get_all_exp_data(dir)
-# for key, exp_data in exp_data_dict.items():
-#     if exp_data["accuracy_train"] > exp_data["accuracy_test"]:
-#         print(key)
+dir1 = "resources/ans/exp_data/module1/"
+dir2 = "resources/ans/exp_data/module2/"
+dir3 = "resources/ans/exp_data/module3/"
+dir4 = "resources/ans/exp_data/module4/"
+dir5 = "resources/ans/exp_data/module5/"
+dir6 = "resources/ans/exp_data/module6/"
+i=1
+for dir in [dir1, dir2, dir3, dir4, dir5, dir6]:
+    exp_data_dict = analysis.get_all_exp_data(dir)
+    print("模型" + str(i) + "过拟合的参数组合")
+    i += 1
+    for key, exp_data in exp_data_dict.items():
+        if exp_data["accuracy_train"] > exp_data["accuracy_test"]:
+            print(key)
 
-
+#
 # learning_rate, num_epochs, activation = [1e-3, 1e-4, 1e-5], [100, 200, 300], ["sigmoid", "relu"]
 # t_cnt, f_cnt, cnt = 0, 0, 0
 # for i in [1, 2, 3, 4]:
@@ -163,13 +173,13 @@ dir = "resources/ans/exp_data/module2/"
 # f_name = "激活函数对测试集精度的影响"
 # painter.pie_chart(data=data, label=label, f_name=f_name, img_size=(12, 8))
 
-dir1 = "resources/ans/exp_data/module1/"
-dir2 = "resources/ans/exp_data/module2/"
-dir3 = "resources/ans/exp_data/module3/"
-dir4 = "resources/ans/exp_data/module4/"
-dir5 = "resources/ans/exp_data/module5/"
-dir6 = "resources/ans/exp_data/module6/"
-for dir in [dir1, dir2, dir3, dir4, dir5, dir6]:
-    key, exp_data = analysis.get_best_accuracy_module(exp_data_dir=dir)
-    print((100-exp_data["accuracy_test"]))
-
+# dir1 = "resources/ans/exp_data/module1/"
+# dir2 = "resources/ans/exp_data/module2/"
+# dir3 = "resources/ans/exp_data/module3/"
+# dir4 = "resources/ans/exp_data/module4/"
+# dir5 = "resources/ans/exp_data/module5/"
+# dir6 = "resources/ans/exp_data/module6/"
+# for dir in [dir1, dir2, dir3, dir4, dir5, dir6]:
+#     key, exp_data = analysis.get_best_accuracy_module(exp_data_dir=dir)
+#     print((100-exp_data["accuracy_test"]))
+#

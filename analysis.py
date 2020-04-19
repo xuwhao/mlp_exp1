@@ -58,7 +58,7 @@ def partial_arr(arr, arr_y):
     for i in range(len(arr)):
         if arr[i] - 0 < 1e-6:
             count += 1
-        if count == 200:
+        if count == 100:
             pos = i
             break
     return arr[25:pos], arr_y[25:pos]
