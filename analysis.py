@@ -40,18 +40,20 @@ def get_best_accuracy_module(exp_data_dir=None, exp_data_dict=None):
     if exp_data_dict is None:
         exp_data_dict = get_all_exp_data(exp_data_dir)
     accuracy = 0.0
+    name = ""
     best_exp_data = {}
-    for exp_data in exp_data_dict.values():
+    for key, exp_data in exp_data_dict.items():
         if exp_data["accuracy_test"] > accuracy:
             accuracy = exp_data["accuracy_test"]
             best_exp_data = exp_data
+            name = key
     print(accuracy)
-    return best_exp_data
+    return name, best_exp_data
 
 
 def partial_arr(arr, arr_y):
     arr = np.array(arr)
-    count, pos = 0, 0
+    count, x, pos = 0, 5, 0
     for i in range(len(arr)):
         if arr[i] - 0 < 1e-6:
             count += 1

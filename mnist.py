@@ -89,7 +89,7 @@ def show_mnist_image(data_loader=None, size=10):
     plt.show()
 
 
-def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight_decay=0):
+def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight_decay=0, test_loader=None):
     """
     训练神经网络
     :param train_loader: 训练集数据管道
@@ -107,7 +107,7 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
     # 待记录的数据初始化
     exp_data = {"learning_rate": learning_rate, "num_epochs": num_epochs,
                 "batch_size": train_loader.batch_size}
-    loss_x, loss_y = [], []
+    loss_x, loss_y, loss_y_test = [], [], []
     correct = 0
     total = 0
 
@@ -157,6 +157,11 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
+            # 训练集损失
+            loss_test = test_loss(test_loader=test_loader, model=model,
+                                  criterion_name=criterion_name, criterion=criterion)
+            loss_y_test.append(loss_test.item())
+
             if (i + 1) % 10 == 0:  # 每十次打印一下
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
@@ -166,6 +171,7 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
     print('Train Accuracy of the network: {} %'.format(accuracy))
     exp_data["loss_x"] = loss_x
     exp_data["loss_y"] = loss_y
+    exp_data["loss_y_test"] = loss_y_test
     exp_data["accuracy_train"] = accuracy
     return exp_data
 
@@ -214,7 +220,7 @@ def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, 
             accuracy_train 训练集精度, accuracy_test 测试集精度
     """
     exp_data = train(train_loader=train_loader, model=model, num_epochs=num_epochs, learning_rate=learning_rate,
-                     criterion_name=criterion_name, weight_decay=weight_decay)
+                     criterion_name=criterion_name, weight_decay=weight_decay, test_loader=test_loader)
     accuracy_test = test_accuracy(test_loader, model)
     exp_data['accuracy_test'] = accuracy_test
     return exp_data
@@ -235,3 +241,27 @@ def save_exp_data(exp_data, file_name, data_dir):
         result.append(key + ":" + str(exp_data[key]))
     fp.writelines([line + '\n' for line in result])
     fp.close()
+
+
+def test_loss(test_loader, model, criterion_name, criterion):
+    """
+    在测试集上计算损失函数
+    :param test_loader: 测试集数据管道
+    :param model: 训练好的模型
+    :return: accuracy 精度
+    """
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    loss = 0.0
+    i = 0
+    with torch.no_grad():
+        for images, labels in test_loader:
+            one_hot = labels
+            if criterion_name == "mse":
+                one_hot = labels_to_one_hot(labels=labels)
+            images = images.reshape(-1, 28 * 28).to(device)
+            labels = labels.to(device)
+            one_hot = one_hot.to(device)
+            outputs = model(images)
+            loss += criterion(outputs, one_hot)
+            i += 1
+    return loss / i
