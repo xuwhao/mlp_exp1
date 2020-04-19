@@ -15,9 +15,11 @@ def get_all_exp_data(exp_data_dir):
     for url in file_urls:
         record = {}
         f = open(exp_data_dir + url, 'r')
+        print(url)
         for line in f:
+            print(line)
             key, value = line.strip().split(':')
-            if key == "loss_x" or key == "loss_y" or "loss_y_test":
+            if key == "loss_x" or key == "loss_y" or key == "loss_y_test":
                 value = value.strip('[')
                 value = value.strip(']')
                 value = list(map(float, value.split(',')))
@@ -61,4 +63,4 @@ def partial_arr(arr, arr_y):
         if count == 200:
             pos = i
             break
-    return arr[5:pos], arr_y[5:pos]
+    return arr[25:pos], arr_y[25:pos]
