@@ -135,7 +135,8 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
                 one_hot = labels_to_one_hot(labels=labels)
 
             # gpu加速
-            images = images.reshape(-1, 28 * 28).to(device)
+            images = images.to(device)
+            # images = images.reshape(-1, 28 * 28).to(device)
             labels = labels.to(device)
             one_hot = one_hot.to(device)
 
@@ -148,21 +149,20 @@ def train(train_loader, model, num_epochs, learning_rate, criterion_name, weight
             loss.backward()
             optimizer.step()
 
-            # 数据记录
-            loss_x.append(int((epoch + 1) * i))  # 迭代次数
-            loss_y.append(loss.item())  # 对应loss
+            if (i + 1) % 50 == 0:  # 每50次打印一下
+                # 数据记录
+                loss_x.append(int((epoch + 1) * i))  # 迭代次数
+                loss_y.append(loss.item())  # 对应loss
 
-            # 精度
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+                # 精度
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
-            # 训练集损失
-            loss_test = test_loss(test_loader=test_loader, model=model,
-                                  criterion_name=criterion_name, criterion=criterion)
-            loss_y_test.append(loss_test.item())
-
-            if (i + 1) % 10 == 0:  # 每十次打印一下
+                # 训练集损失
+                loss_test = test_loss(test_loader=test_loader, model=model,
+                                      criterion_name=criterion_name, criterion=criterion)
+                loss_y_test.append(loss_test.item())
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
 
@@ -189,19 +189,25 @@ def test_accuracy(test_loader, model):
     with torch.no_grad():
         correct = 0
         total = 0
+        wrong_imgs, wrong_imgs_label, wrong_imgs_pre = [], [], []
         for images, labels in test_loader:
-            images = images.reshape(-1, 28 * 28).to(device)
+            images = images.to(device)
             labels = labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
             # print(_, predicted)
             total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            corr_array = predicted == labels
+            correct += corr_array.sum().item()
+            for index, flag in enumerate(corr_array):
+                if not flag:
+                    wrong_imgs.append(images[index].cpu().numpy().tolist())
+                    wrong_imgs_label.append(labels[index].cpu().item())
+                    wrong_imgs_pre.append(predicted[index].cpu().item())
 
         accuracy = 100 * correct / total
         print('Test Accuracy of the network: {} %'.format(accuracy))
-
-    return accuracy
+    return accuracy, wrong_imgs, wrong_imgs_label, wrong_imgs_pre
 
 
 def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, criterion_name, weight_decay=0):
@@ -221,8 +227,11 @@ def train_and_test(train_loader, test_loader, model, num_epochs, learning_rate, 
     """
     exp_data = train(train_loader=train_loader, model=model, num_epochs=num_epochs, learning_rate=learning_rate,
                      criterion_name=criterion_name, weight_decay=weight_decay, test_loader=test_loader)
-    accuracy_test = test_accuracy(test_loader, model)
+    accuracy_test, wrong_imgs, wrong_imgs_label, wrong_imgs_pre = test_accuracy(test_loader, model)
     exp_data['accuracy_test'] = accuracy_test
+    exp_data['wrong_imgs'] = wrong_imgs
+    exp_data['wrong_imgs_label'] = wrong_imgs_label
+    exp_data['wrong_imgs_pre'] = wrong_imgs_pre
     return exp_data
 
 
@@ -233,8 +242,14 @@ def save_exp_data(exp_data, file_name, data_dir):
     :param file_name 文件名
     :param data_dir 保存路径
     """
+    image_dir = data_dir + file_name + '/'
     if not os.path.exists(data_dir):
         os.mkdir(data_dir)
+    if not os.path.exists(image_dir):
+        os.mkdir(image_dir)
+    show_wrong_images_per_times(exp_data['wrong_imgs'], exp_data['wrong_imgs_label'],
+                                exp_data['wrong_imgs_pre'], image_dir, 10)
+    del exp_data['wrong_imgs'], exp_data['wrong_imgs_label'], exp_data['wrong_imgs_pre']
     fp = open(data_dir + file_name + ".txt", 'w', encoding='utf-8')
     result = []
     for key in exp_data.keys():
@@ -258,10 +273,67 @@ def test_loss(test_loader, model, criterion_name, criterion):
             one_hot = labels
             if criterion_name == "mse":
                 one_hot = labels_to_one_hot(labels=labels)
-            images = images.reshape(-1, 28 * 28).to(device)
+            images = images.to(device)
             labels = labels.to(device)
             one_hot = one_hot.to(device)
             outputs = model(images)
             loss += criterion(outputs, one_hot)
             i += 1
     return loss / i
+
+
+def show_wrong_image(wrong_imgs, labels, predicted, file_name):
+    """
+    展示识别错误的图片
+    :param
+    :param
+    :return:
+    """
+    imgs = torch.Tensor(wrong_imgs)
+    titles = []
+    for pos, label in enumerate(labels):
+        tmp = str(label) + " " + str(predicted[pos])
+        titles.append(tmp)
+
+    # 设置为svg格式显示, 可缩放矢量图形(Scalable Vector Graphics)
+    display.set_matplotlib_formats('svg')
+
+    # _: 忽略的变量
+    _, figs = plt.subplots(1, len(imgs), figsize=(8, 2))
+
+    # 将每一张图片和对应的标签在子图中展示
+    for f, img, lbl in zip(figs, imgs, titles):
+        # 将784的vector转为28*28展示
+        f.imshow(img.view(28, 28).numpy())
+        # 在图片上方设置对应的label
+        f.set_title(lbl)
+        f.axes.get_xaxis().set_visible(False)
+        f.axes.get_yaxis().set_visible(False)
+    plt.savefig(file_name + '.png')
+    plt.close()
+
+
+def show_wrong_images_per_times(wrong_imgs, labels, predicted, data_dir, size=10):
+    i, cnt = 0, 1
+    while i <= len(wrong_imgs):
+        show_wrong_image(wrong_imgs[i:i + size], labels[i:i + size],
+                         predicted[i:i + size], data_dir + "image" + str(cnt))
+        i += size
+        cnt += 1
+
+# def save_wrong_imgs(wrong_imgs, file_name, data_dir):
+#     """
+#     保存实验数据
+#     :param exp_data 实验数据dict
+#     :param file_name 文件名
+#     :param data_dir 保存路径
+#     """
+#     data_dir += "/wrong_imgs"
+#     if not os.path.exists(data_dir):
+#         os.mkdir(data_dir)
+#     fp = open(data_dir + file_name + ".txt", 'w', encoding='utf-8')
+#     result = []
+#     for key in :
+#         result.append(key + ":" + str(exp_data[key]))
+#     fp.writelines([line + '\n' for line in result])
+#     fp.close()

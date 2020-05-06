@@ -53,12 +53,13 @@ def get_best_accuracy_module(exp_data_dir=None, exp_data_dict=None):
 
 
 def partial_arr(arr, arr_y):
-    arr = np.array(arr)
-    count, x, pos = 0, 5, 0
-    for i in range(len(arr)):
-        if arr[i] - 0 < 1e-6:
-            count += 1
-        if count == 100:
-            pos = i
-            break
-    return arr[25:pos], arr_y[25:pos]
+    # arr = np.array(arr)
+    # count, x, pos = 0, 5, 0
+    # for i in range(len(arr)):
+    #     if arr[i] - 0 < 1e-4:
+    #         count += 1
+    #     if count == 1:
+    #         pos = i
+    #         break
+    # return arr[25:pos], arr_y[25:pos]
+    return arr, arr_y
