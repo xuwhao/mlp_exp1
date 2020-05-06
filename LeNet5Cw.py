@@ -19,7 +19,7 @@ import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 exp_data_dir = 'resources/ans/exp_data/LeNet5_cw/'
 kernels = [[4, 1, 2, 1], [4, 2, 2, 1], [2, 1, 2, 1]]
-lrs, epoch, batches = [1e-3, 1e-4, 1e-5], 1, [200, 300, 400]
+lrs, epoch, batches = [1e-3, 1e-4, 1e-5], 20, [200, 300, 400]
 
 for kernel in kernels:
     for lr in lrs:
