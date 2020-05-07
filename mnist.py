@@ -300,9 +300,9 @@ def show_wrong_image(wrong_imgs, labels, predicted, file_name):
 
     # _: 忽略的变量
     _, figs = plt.subplots(1, len(imgs), figsize=(8, 2))
-    print(">>> len img", len(imgs), len(figs), len(wrong_imgs))
-    print(">>> len figs", len(figs))
+    print(">>> len img", len(imgs))
     print(">>> type figs", type(figs))
+    print(">>> len figs", len(figs))
     print(">>> len wrong_img", len(wrong_imgs))
     # 将每一张图片和对应的标签在子图中展示
     for f, img, lbl in zip(figs, imgs, titles):
