@@ -34,8 +34,8 @@ class LeNet5(nn.Module):
         oh, ow = calc_pooling_params(nh=oh, nw=ow, kh=pooling_size, kw=pooling_size, stride=pooling_step)
         print("最大池化1 - shape: ", oh, "*", ow)
 
-        self.conv2 = nn.Conv2d(out_channel1, out_channel2, kernel_size)
-        oh, ow, param_size, flops = calc_conv_params(nh=oh, nw=ow, kh=kernel_size,stride=kernel_stride,
+        self.conv2 = nn.Conv2d(out_channel1, out_channel2, kernel_size, kernel_stride)
+        oh, ow, param_size, flops = calc_conv_params(nh=oh, nw=ow, kh=kernel_size, stride=kernel_stride,
                                                      kw=kernel_size, out_channel=out_channel2)
         print("卷积层2 - shape - 参数个数 - 连接数: ", oh, "*", ow, param_size, flops)
 
@@ -43,6 +43,7 @@ class LeNet5(nn.Module):
         oh, ow = calc_pooling_params(nh=oh, nw=ow, kh=pooling_size, kw=pooling_size, stride=pooling_step)
         print("最大池化2 - shape: ", oh, "*", ow)
 
+        print(out_channel2, oh, ow)
         self.fc1 = nn.Linear(int(out_channel2 * oh * ow), 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
@@ -51,13 +52,18 @@ class LeNet5(nn.Module):
             self._init_weight()
 
     def forward(self, x):
+        print(x.shape)
         batch_size = x.shape[0]
         x = self.conv1(x)
+        print("conv1", x.shape)
         x = F.relu(x)
         x = self.maxPool1(x)
+        print("pool1", x.shape)
         x = self.conv2(x)
+        print("conv2", x.shape)
         x = F.relu(x)
         x = self.maxPool2(x)
+        print("pool", x.shape)
         x = x.view(batch_size, -1)
         x = self.fc1(x)
         x = F.relu(x)
