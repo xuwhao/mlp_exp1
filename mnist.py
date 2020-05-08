@@ -299,26 +299,24 @@ def show_wrong_image(wrong_imgs, labels, predicted, file_name):
     display.set_matplotlib_formats('svg')
 
     # _: 忽略的变量
-    _, figs = plt.subplots(1, len(imgs), figsize=(8, 2))
-    print(">>> len img", len(imgs))
-    print(">>> type figs", type(figs))
-    print(">>> len figs", len(figs))
-    print(">>> len wrong_img", len(wrong_imgs))
-    # 将每一张图片和对应的标签在子图中展示
-    for f, img, lbl in zip(figs, imgs, titles):
-        # 将784的vector转为28*28展示
-        f.imshow(img.view(28, 28).numpy())
-        # 在图片上方设置对应的label
-        f.set_title(lbl)
-        f.axes.get_xaxis().set_visible(False)
-        f.axes.get_yaxis().set_visible(False)
-    plt.savefig(file_name + '.png')
-    plt.close()
+    length = len(imgs)
+    if length != 1:
+        _, figs = plt.subplots(1, length, figsize=(8, 2))
+        # 将每一张图片和对应的标签在子图中展示
+        for f, img, lbl in zip(figs, imgs, titles):
+            # 将784的vector转为28*28展示
+            f.imshow(img.view(28, 28).numpy())
+            # 在图片上方设置对应的label
+            f.set_title(lbl)
+            f.axes.get_xaxis().set_visible(False)
+            f.axes.get_yaxis().set_visible(False)
+        plt.savefig(file_name + '.png')
+        plt.close()
 
 
 def show_wrong_images_per_times(wrong_imgs, labels, predicted, data_dir, size=10):
     i, cnt = 0, 1
-    while i <= len(wrong_imgs):
+    while i < len(wrong_imgs):
         show_wrong_image(wrong_imgs[i:i + size], labels[i:i + size],
                          predicted[i:i + size], data_dir + "image" + str(cnt))
         i += size
