@@ -5,6 +5,18 @@ import torch.nn.functional as F
 # @Author  : xwh
 # @Time    : 2020/5/1 17:02
 def calc_conv_params(nh, nw, kh, kw, out_channel, stride, ph=0, pw=0):
+    """
+    计算卷积层参数
+    :param nh input height
+    :param nw input width
+    :param kh kernel height
+    :param hw kernel width
+    :param out_channel 输出通道数
+    :param stride 卷积步长
+    :param ph padding height
+    :param pw padding width
+    :return oh output height ow output width param_size 参数个数 flops 连接数
+    """
     oh, ow = (nh - kh + ph + stride) / stride, (nw - kw + pw + stride) / stride
     param_size = out_channel * (kh * kw + 1)
     flops = oh * ow * param_size
@@ -18,16 +30,25 @@ def calc_pooling_params(nh, nw, kh, kw, stride):
 
 class LeNet5(nn.Module):
 
-    def __init__(self, kernel_size, kernel_stride, pooling_size, pooling_step, init_weight=False):
+    def __init__(self, kernel_size, kernel_stride,
+                 pooling_size, pooling_step, init_weight=False):
+        """
+        LeNet5 构造函数
+        :param kernel_size 卷积核大小
+        :param kernel_stride 卷积步长
+        :param pooling_size 池化核大小
+        :param pooling_step 池化步长
+        :param init_weight 是否进行参数初始化
+        """
         super(LeNet5, self).__init__()
         print("开始实例化模型, 参数计算中...")
 
         out_channel1, img_size, out_channel2 = 6, 28, 16
 
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=out_channel1, kernel_size=kernel_size, stride=kernel_stride)
-        oh, ow, param_size,flops = calc_conv_params(nh=img_size, nw=img_size,
-                                                    kh=kernel_size, kw=kernel_size, stride=kernel_stride,
-                                                    out_channel=out_channel1)
+        oh, ow, param_size, flops = calc_conv_params(nh=img_size, nw=img_size,
+                                                     kh=kernel_size, kw=kernel_size, stride=kernel_stride,
+                                                     out_channel=out_channel1)
         print("卷积层1 - shape - 参数个数 - 连接数: ", oh, "*", ow, param_size, flops)
 
         self.maxPool1 = nn.MaxPool2d(pooling_size, stride=pooling_step, padding=0)

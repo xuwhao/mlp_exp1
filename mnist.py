@@ -185,7 +185,6 @@ def test_accuracy(test_loader, model):
     """
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     accuracy = 0
-
     with torch.no_grad():
         correct = 0
         total = 0
@@ -195,7 +194,6 @@ def test_accuracy(test_loader, model):
             labels = labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
-            # print(_, predicted)
             total += labels.size(0)
             corr_array = predicted == labels
             correct += corr_array.sum().item()

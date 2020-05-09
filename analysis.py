@@ -10,10 +10,14 @@ def get_all_exp_data(exp_data_dir):
     :param exp_data_dir:
     :return: 一个dict key是文件名, value是exp_data 也是个dict
     """
+
     exp_data_dict = {}
     file_urls = os.listdir(exp_data_dir)
+    print(file_urls)
     for url in file_urls:
         record = {}
+        if not url.endswith('.txt'):
+            continue
         f = open(exp_data_dir + url, 'r')
         for line in f:
             key, value = line.strip().split(':')
