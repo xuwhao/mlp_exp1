@@ -8,7 +8,7 @@ class AlexNet(nn.Module):
     def __init__(self):
         super(AlexNet, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(1, 96, 11, 4), # in_channels, out_channels, kernel_size, stride, padding
+            nn.Conv2d(3, 96, 11, 4), # in_channels, out_channels, kernel_size, stride, padding
             nn.ReLU(),
             nn.MaxPool2d(3, 2), # kernel_size, stride
             # 减小卷积窗口，使用填充为2来使得输入与输出的高和宽一致，且增大输出通道数
