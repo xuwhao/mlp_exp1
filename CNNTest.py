@@ -5,8 +5,6 @@ from CNN import *
 import os
 import time
 
-data_loader, test_loader = mnist.load_CIFAR10(batch_size=4)
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 exp_data_dir = 'resources/ans/exp_data/alexnet/'
 lrs, epoch, batch = [1e-3], 1, 256
@@ -14,7 +12,7 @@ train_loader, test_loader = mnist.load_CIFAR10(batch_size=batch, resize=224)
 for lr in lrs:
 
     # 保存的文件名 卷积核_卷积步长_池化核_池化步长_学习率_batch_初始化
-    file_name = "alex" + "_" + batch + " " + lr
+    file_name = "alex" + "_" + str(batch) + " " + str(lr)
     # 如果对应名字的文件已存在, 说明这组参数训练过了, 跳过
     if os.path.isfile(exp_data_dir + file_name + ".txt"):
         print("参数组合 [" + file_name + "] 已训练, 跳过该组超参数...")
