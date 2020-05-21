@@ -336,3 +336,27 @@ def show_wrong_images_per_times(wrong_imgs, labels, predicted, data_dir, size=10
 #         result.append(key + ":" + str(exp_data[key]))
 #     fp.writelines([line + '\n' for line in result])
 #     fp.close()
+
+
+def load_CIFAR10(data_dir='resources/dataset', batch_size=4, resize=None):
+
+    trans = []
+    if resize:
+        trans.append(torchvision.transforms.Resize(size=resize))
+
+    trans.append(torchvision.transforms.ToTensor())
+    trans.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+    transform = torchvision.transforms.Compose(trans)
+
+    raw_train = torchvision.datasets.CIFAR10(root=data_dir, train=True, download=True, transform=transform)
+    raw_test = torchvision.datasets.CIFAR10(root=data_dir, train=False, download=True, transform=transform)
+
+    train_loader = torch.utils.data.DataLoader(dataset=raw_train,
+                                               batch_size=batch_size,
+                                               shuffle=True)
+
+    test_loader = torch.utils.data.DataLoader(dataset=raw_test,
+                                              batch_size=batch_size,
+                                              shuffle=False)
+    return train_loader, test_loader
